@@ -158,15 +158,12 @@ plt.title("10% best return periods")
 
 # gets how many are 10% of all days
 elem_required = int(0.1*len(ratio_values))
-# sorts the list
+# sorts the list and get best 10%
 highest_values = sorted(ratio_values)[-elem_required:]
-# new list with best-return indexes to find the timestamps
-highest_idx = []
 
 # cycles the list to find the timestamps of the higher return days
 for i in range(len(ratio_values)):
     if ratio_values[i] in highest_values:
-        highest_idx.append(i)
         plt.axvline(x=diff_ts[i], color="orange", alpha=0.2)
 
 plt.savefig("part2_task4.png", dpi=600)
