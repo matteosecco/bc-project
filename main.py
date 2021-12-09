@@ -10,34 +10,35 @@ def mean(l):
 
 def jsonr(filename):
     """ Json read function """
-    with open(filename) as f:
-        return json.load(f)
+    f = open(filename)
+    data = json.load(f)
+    f.close()
+
+    return data
 
 
 def plotsetup(title, ylab="", xlab="", xtick=4, ytick=8, ylab2=""):
     """ Plot-setup function to avoid redundance
         Returns 'fig' and 'ax' in case they are needed for specific purposes"""
-    
+
     fig, ax = plt.subplots()
     ax.xaxis.set_major_locator(plt.MaxNLocator(xtick))
     ax.yaxis.set_major_locator(plt.MaxNLocator(ytick))
     plt.title(title)
     plt.ylabel(ylab)
     plt.xlabel(xlab)
-    
+    plt.grid()
+
     # sets 'ax2' only when specified
     if ylab2 != "":
         ax2 = ax.twinx()
         ax2.set_ylabel(ylab2)
         ax2.xaxis.set_major_locator(plt.MaxNLocator(xtick))
         ax2.yaxis.set_major_locator(plt.MaxNLocator(ytick))
-    else:
-        # returned empty if not used
-        ax2 = ""
 
-    plt.grid()
+        return fig, ax, ax2
 
-    return fig, ax, ax2
+    return fig, ax
 
 
 def getval(data):
@@ -150,11 +151,11 @@ plt.plot(diff_ts, ratio_values, color="black", alpha=0.2)
 plt.plot(diff_ts, smooth(ratio_values, n=7), color="black")
 
 plt.savefig("part2_task3.png", dpi=600)
-
+plt.cla()
 
 """ part 2 task 4 """
 
-plt.title("10% best return periods")
+plotsetup("10% best return periods")
 
 # gets how many are 10% of all days
 elem_required = int(0.1*len(ratio_values))
@@ -164,6 +165,8 @@ highest_values = sorted(ratio_values)[-elem_required:]
 # cycles the list to find the timestamps of the higher return days
 for i in range(len(ratio_values)):
     if ratio_values[i] in highest_values:
-        plt.axvline(x=diff_ts[i], color="orange", alpha=0.2)
+        plt.axvline(x=diff_ts[i], color="orange", alpha=1)
+
+plt.plot(diff_ts, smooth(ratio_values, n=7), color="black")
 
 plt.savefig("part2_task4.png", dpi=600)
