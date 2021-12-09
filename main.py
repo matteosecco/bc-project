@@ -14,18 +14,38 @@ def jsonr(filename):
         return json.load(f)
 
 
-def plotsetup(title, ylab="", xlab="", xtick=4, ytick=8):
-    """ Plot setup function to avoid redundance """
+def plotsetup(title, ylab="", xlab="", xtick=4, ytick=8, ylab2=""):
+    """ Plot setup function to avoid redundance
+        Returns 'fig' and 'ax' in case they are needed for specific purposes"""
     fig, ax = plt.subplots()
-    ax.xaxis.set_major_locator(plt.MaxNLocator(4))
-    ax.yaxis.set_major_locator(plt.MaxNLocator(8))
+    ax.xaxis.set_major_locator(plt.MaxNLocator(xtick))
+    ax.yaxis.set_major_locator(plt.MaxNLocator(ytick))
     plt.title(title)
     plt.ylabel(ylab)
     plt.xlabel(xlab)
+    if ylab2 != "":
+        ax2 = ax.twinx()
+        ax2.set_ylabel(ylab2)
+        ax2.xaxis.set_major_locator(plt.MaxNLocator(xtick))
+        ax2.yaxis.set_major_locator(plt.MaxNLocator(ytick))
+    else:
+        # returned empty if not used
+        ax2 = ""
+    
     plt.grid()
+    
+    return fig, ax, ax2
 
 
-def smooth4(l, n=15):
+def getval(data):
+    """ Gets data in the format found in ["values"] (dict with x, y keys) 
+        and returns a tuple containing the two lists (x, y)
+    """
+
+    return [x["y"] for x in data], [datetime.fromtimestamp(x["x"]) for x in data]
+
+
+def smooth(l, n=15):
     """ Takes a list and returns it smoothed
         In the range (1, n) each mean must be done with that number of elements
         Official function to be used
@@ -58,21 +78,33 @@ def smooth4(l, n=15):
     return new_l
 
 
-MC = jsonr("market-cap.json")
-DIFF = jsonr("difficulty.json")
-REV = jsonr("miners-revenue.json")
-# plt.figure(dpi=600)
+def norm(l):
+    """ Normalize a list so that it starts from 100 """
+
+    # moltiplicatore
+    molt = 1 / l[0]
+
+    new_l = []
+
+    for e in l:
+        new_l.append(e * molt)
+
+    return new_l
+
+
+# unpack all data in 6 lists
+mc_values, mc_ts = getval(jsonr("market-cap.json")["values"])
+# lists are made compatible
+diff_values, diff_ts = getval(jsonr("difficulty.json")["values"][5:])
+rev_values, rev_ts = getval(jsonr("miners-revenue.json")["values"][:-5])
 
 
 """ part 1 task 1 """
 
-# data set up
-values = [x["y"] for x in MC["values"]]
-timestamps = [datetime.fromtimestamp(x["x"]) for x in MC["values"]]
 
 plotsetup("Market capitalization", ylab="USD")
 
-plt.plot(timestamps, values, color="black")
+plt.plot(mc_ts, mc_values, color="black")
 plt.savefig("part1_task1.png", dpi=600)
 
 plt.cla()
@@ -81,6 +113,29 @@ plt.cla()
 
 plotsetup("Market capitalization (smoothed)", ylab="USD")
 
-plt.plot(timestamps, smooth4(values), color="black")
-plt.plot(timestamps, values, color="black", alpha=0.2)
+plt.plot(mc_ts, smooth(mc_values), color="black")
+plt.plot(mc_ts, mc_values, color="black", alpha=0.2)
 plt.savefig("part1_task2.png", dpi=600)
+
+plt.cla()
+
+
+""" part 2 task 1 """
+
+plotsetup("Miner revenues", ylab="USD")
+
+plt.plot(rev_ts, smooth(rev_values, n=7), color="black")
+plt.savefig("part2_task1.png", dpi=600)
+
+plt.cla()
+
+""" part 2 task 2 """
+
+fig, ax, ax2 = plotsetup("Revenues and difficulty", ylab="USD", ylab2="Difficulty")
+
+
+ax.plot(rev_ts, smooth(rev_values, n=7), color="orange", label="Revenues")
+ax2.plot(diff_ts, norm(smooth(diff_values, n=7)), color="teal", label="Difficulty")
+plt.savefig("part2_task2.png", dpi=600)
+
+plt.cla()
