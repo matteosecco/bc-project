@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Dec 10 09:21:22 2021
-
-@author: Giada Sansonetto
-"""
-
 from matplotlib import pyplot as plt
 import matplotlib.dates as ydates 
 from datetime import datetime
@@ -192,16 +185,18 @@ for i in range(len(ratio_values)):
     if ratio_values[i] in highest_values:
         plt.axvline(x=diff_ts[i], color="orange", alpha=1)
 
-plt.plot(diff_ts, smooth(ratio_values, n=7), color="black", linewidth=1.5, alpha=1)
+plt.plot(diff_ts, smooth(ratio_values, n=7), color="black", linewidth=1.5, alpha=1) #
 
-plt.savefig("part2_task4.png", dpi=600)
-
-'''Additional insight
-    by normalizing the BTC market cap,
+'''Additional note
+    by plotting the BTC market cap curve,
     we compare periods of best returns
     with the market capitalization.
     How is the market performing when 
     there are the highest profits.'''
+
+plt.savefig("part2_task4.png", dpi=600)
+
+'''Additional insight'''
     
 slope = smooth(tangent(smooth(mc_values)))
 
